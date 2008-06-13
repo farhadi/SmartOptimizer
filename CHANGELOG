@@ -1,0 +1,40 @@
+-------------------- 1.6 beta [2008-06-13] ---------------------
+2008-06-13  Ali Farhadi <ali@farhadi.ir>
+	Change log and brief documentation added.
+	* minifiers/css.php, index.php: Ability of embedding css images and css imported files was added.
+	* minifiers/css.php: Duplicated urls (i.e. css sprites) will not be embeded for better performance.
+	* config.php: embed feature can be disabled in config file.
+	* config.php: Maximum file size of embedded files can be specified.
+	* .htaccess: bug fixed in removing Etag headers for static contents.
+
+-------------------- 1.5 beta [2008-05-24] ---------------------
+2008-05-24  Ali Farhadi <ali@farhadi.ir>
+	The project renamed to SmartOptimizer.
+	SmartOptimizer is a completely rewritten and restructured version of JSmart.
+    * index.php: Ability of concatenating js and css files was added.
+	* minifiers/css.php: Relative paths in css files will be corrected if needed.
+	* config.php: Cache settings is more customizable.
+	* config.php: Ability of disabling minification and gzip compression was added.
+    * index.php: Handling expire headers for a wide range of file types was added.
+	* index.php: getallheaders function is not used anymore, since it is not supported in all the servers.
+
+-------------------- 1.0 Final Release [2006-07-07] ---------------------
+2006-07-07  Ali Farhadi <ali@farhadi.ir>
+	* load.php: Ability of compressing CSS files was added.
+    * load.php: Content-Type of js files was corrected. (from text/plain to application/x-javascript)
+    
+-------------------- 1.0 RC2 [2006-07-01] ---------------------
+2006-07-01  Ali Farhadi <ali@farhadi.ir>
+	* config.php: Charset of js files can be specified in config file.
+	* load.php: Debugging capabilities was added.
+	* config.php: Debug mode can be enabled or disabled using config file.
+	* config.php: Cache feature can be disabled in config file
+	
+-------------------- 1.0 RC [2006-06-29] ---------------------
+2006-06-29  Ali Farhadi <ali@farhadi.ir>
+	* config.php: JSmart is more customizable using config.php
+    * load.php: JSmart will not crash if zlib extension is not installed.
+	
+-------------------- 1.0 beta [2006-06-25] ---------------------
+2006-06-25  Ali Farhadi <ali@farhadi.ir>
+	It is the first release

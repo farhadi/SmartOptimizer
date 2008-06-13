@@ -1,6 +1,7 @@
 <?php
-/* SmartOptimizer v1.5 beta
- * SmartOptimizer enhances your website performance using techniques such as Compression, Concatenation, minifying snd Caching.
+/* SmartOptimizer v1.6 beta
+ * SmartOptimizer enhances your website performance using techniques 
+ * such as compression, concatenation, minifying, caching, and embedding on demand.
  * 
  * Copyright (c) 2006-2008 Ali Farhadi (http://farhadi.ir/)
  * Released under the terms of the GNU Public License.
@@ -10,6 +11,7 @@
  * Website: http://farhadi.ir/
  */
 
+//Default settings
 $settings = array(	
 	'baseDir' => '../',
 	'charSet' => 'utf-8',
@@ -19,6 +21,8 @@ $settings = array(
 	'minify' => true,
 	'concatenate' => true,
 	'separator' => ',',
+	'embed' => true,
+	'embedMaxSize' => 5120,
 	'serverCache' => true,
 	'serverCacheCheck' => false,
 	'cacheDir' => 'cache/',
@@ -27,6 +31,7 @@ $settings = array(
 	'clientCacheCheck' => false,
 );
 	
+//mime types
 $mimeTypes = array(
 	"js"	=> "application/x-javascript",
 	"css"	=> "text/css",    
@@ -41,12 +46,10 @@ $mimeTypes = array(
 	"swf"	=> "application/x-shockwave-flash",
 );
 
-
 function headerExit($status) {
 	header("HTTP/1.0 $status");
 	exit();
 }
-
 
 function headerNoCache() {
 	// already expired
@@ -84,7 +87,7 @@ function debugExit($msg){
 	echo "alert('SmartOptimizer Error: ".str_replace("\n", "\\n", addslashes($msg))."');\n";
 	echo "//</script>\n";
 	exit();
-} 
+}
 
 function gmdatestr($time = null) {
 	if (is_null($time)) $time = time();
@@ -120,8 +123,8 @@ if ($settings['concatenate']) {
 } else $files = array($fileNames);
 
 foreach ($files as $key => $file) {
-	if (preg_match('/\.([a-z0-9]+)$/', $file, $matchResult)) {
-		$fileTypes[] = $matchResult[1];
+	if (preg_match('/\.([a-z0-9]+)$/i', $file, $matchResult)) {
+		$fileTypes[] = strtolower($matchResult[1]);
 	} else debugExit("Unsupported file ($file)");
 	
 	$files[$key] = $fileDir.$file;
@@ -145,10 +148,11 @@ $settings['gzip'] =
 if ($settings['gzip']) header("Content-Encoding: gzip");
 
 $settings['minify'] = $settings['minify'] && file_exists('minifiers/'.$fileType.'.php');
-$settings['serverCache'] = $settings['serverCache'] && ($settings['minify'] || $settings['gzip'] || $settings['concatenate']);
+$settings['embed'] = $settings['embed'] && $fileType == 'css' && (!preg_match('/msie/i', $_SERVER['HTTP_USER_AGENT']) || preg_match('/msie 8|opera/i', $_SERVER['HTTP_USER_AGENT']));
+$settings['serverCache'] = $settings['serverCache'] && ($settings['minify'] || $settings['gzip'] || $settings['concatenate'] || $settings['embed']);
 
 if ($settings['serverCache']) {
-	$cachedFile = $settings['cacheDir'].$settings['cachePrefix'].md5($query).'.'.$fileType.($settings['gzip'] ? '.gz' : '');
+	$cachedFile = $settings['cacheDir'].$settings['cachePrefix'].md5($query.($settings['embed']?'1':'0')).'.'.$fileType.($settings['gzip'] ? '.gz' : '');
 }
 
 $generateContent = ((!$settings['serverCache'] && (!$settings['clientCache'] || !$settings['clientCacheCheck'] || !isset($_SERVER['HTTP_IF_MODIFIED_SINCE']) || $_SERVER['HTTP_IF_MODIFIED_SINCE'] != gmdatestr(filesmtime()))) || 

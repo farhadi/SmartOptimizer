@@ -4,7 +4,7 @@
  */
 
 
-//base dir
+//base dir (a relative path to the base directory)
 $settings['baseDir'] = '../';
 
 //Encoding of your js and css files. (utf-8 or iso-8859-1)
@@ -27,6 +27,12 @@ $settings['concatenate'] = true;
 
 //separator for files to be concatenated
 $settings['separator'] = ',';
+
+//specifies whether to emebed files included in css files using the data URI scheme or not 
+$settings['embed'] = true;
+
+//The maximum size of an embedded file. (use 0 for unlimited size)
+$settings['embedMaxSize'] = 5120; //5KB
 
 //to set server-side cache On or Off
 $settings['serverCache'] = true;

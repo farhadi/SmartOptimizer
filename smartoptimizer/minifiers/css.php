@@ -3,15 +3,48 @@
  * SmartOptimizer CSS Minifier
  */
 
-function minify_css($str) {
-	global $settings;
+function convertUrl($url, $count)
+{
+	global $settings, $mimeTypes, $fileDir;
 	
-	$urlPrefix = '';
-	if (strpos($_SERVER['REQUEST_URI'], $_SERVER['SCRIPT_NAME'].'?') === 0 ||
-		strpos($_SERVER['REQUEST_URI'], dirname($_SERVER['SCRIPT_NAME']).'/?') === 0 ) {
-		$urlPrefix = '../'.dirname($_SERVER['QUERY_STRING']).'/';
+	static $baseUrl = '';
+	
+	if (preg_match('@^[^/]+:@', $url)) return $url;
+	
+	$fileType = substr(strrchr($url, '.'), 1);
+	if (isset($mimeTypes[$fileType])) $mimeType = $mimeTypes[$fileType];
+	else $mimeType = mime_content_type($url);
+	
+	if (!$settings['embed'] ||
+		!file_exists($fileDir.$url) ||
+		($settings['embedMaxSize'] > 0 && filesize($fileDir.$url) > $settings['embedMaxSize']) ||
+		!$fileType ||
+		!$mimeType ||
+		$count > 1) {
+		if (strpos($_SERVER['REQUEST_URI'], $_SERVER['SCRIPT_NAME'].'?') === 0 ||
+			strpos($_SERVER['REQUEST_URI'], rtrim(dirname($_SERVER['SCRIPT_NAME']), '\/').'/?') === 0) {
+			if (!$baseUrl) return $fileDir . $url;
+		}
+		return $baseUrl . $url;
 	}
 	
+	$contents = file_get_contents($fileDir.$url);
+	 
+	if ($fileType == 'css') {
+		$oldFileDir = $fileDir;
+		$fileDir = rtrim(dirname($fileDir.$url), '\/').'/';
+		$oldBaseUrl = $baseUrl;
+		$baseUrl = 'http'.(@$_SERVER['HTTPS']?'s':'').'://'.$_SERVER['HTTP_HOST'].rtrim(dirname($_SERVER['SCRIPT_NAME']), '\/').'/'.$fileDir;
+		$contents = minify_css($contents);		
+		$fileDir = $oldFileDir;
+		$baseUrl = $oldBaseUrl;
+	}
+	
+	$base64   = base64_encode($contents); 
+	return 'data:' . $mimeType . ';base64,' . $base64;
+}
+
+function minify_css($str) {
 	$res = '';
 	$i=0;
 	$inside_block = false;
@@ -19,26 +52,29 @@ function minify_css($str) {
 	while ($i+1<strlen($str)) {
 		if ($str[$i]=='"' || $str[$i]=="'") {//quoted string detected
 			$res .= $quote = $str[$i++];
-			if (strtolower(substr($res, -5, 4))=='url(') {
-				if (!preg_match('@://@', substr($str, $i, strpos($str, ')', $i) - $i))) $res .= $urlPrefix;
-			}
+			$url = '';
 			while ($i<strlen($str) && $str[$i]!=$quote) {
 				if ($str[$i] == '\\') {
-					$res .= $str[$i++];
+					$url .= $str[$i++];
 				}
-				$res .= $str[$i++];
+				$url .= $str[$i++];
 			}
+			if (strtolower(substr($res, -5, 4))=='url(' || strtolower(substr($res, -9, 8)) == '@import ') {
+				$url = convertUrl($url, substr_count($str, $url));
+			}
+			$res .= $url;
 			$res .= $str[$i++];
 			continue;
-		} elseif (strtolower(substr($res, -4))=='url(') {//uri detected
-			if ($str[$i] == '\'' || $str[$i] == '"') $res .= $str[$i++];
-			if (!preg_match('@://@', substr($str, $i, strpos($str, ')', $i) - $i))) $res .= $urlPrefix;
+		} elseif (strtolower(substr($res, -4))=='url(') {//url detected
+			$url = '';
 			do {
 				if ($str[$i] == '\\') {
-					$res .= $str[$i++];
+					$url .= $str[$i++];
 				}
-				$res .= $str[$i++];
+				$url .= $str[$i++];
 			} while ($i<strlen($str) && $str[$i]!=')');
+			$url = convertUrl($url, substr_count($str, $url));
+			$res .= $url;
 			$res .= $str[$i++];
 			continue;
 		} elseif ($str[$i].$str[$i+1]=='/*') {//css comment detected
