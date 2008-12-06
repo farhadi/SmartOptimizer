@@ -8,7 +8,7 @@ function minify_js($str) {
 	$i=0;
 	$current_char = '';
 	while ($i+1<strlen($str)) {
-		if ($maybe_regex && $str[$i]=='/' && $str[$i+1]!='/' && $str[$i+1]!='*') {//regex detected
+		if ($maybe_regex && $str[$i]=='/' && $str[$i+1]!='/' && $str[$i+1]!='*' && @$str[$i-1]!='*') {//regex detected
 			if (strlen($res) && $res[strlen($res)-1] === '/') $res .= ' ';
 			do {
 				if ($str[$i] == '\\') {
@@ -36,7 +36,7 @@ function minify_js($str) {
 			} while ($i<strlen($str) && $str[$i]!=$quote);
 			$res .= $str[$i++];
 			continue;
-		} elseif ($str[$i].$str[$i+1]=='/*') {//multi-line comment detected
+		} elseif ($str[$i].$str[$i+1]=='/*' && @$str[$i+2]!='@') {//multi-line comment detected
 			$i+=3;
 			while ($i<strlen($str) && $str[$i-1].$str[$i]!='*/') $i++;
 			if ($current_char == "\n") $str[$i] = "\n";
