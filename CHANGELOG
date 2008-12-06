@@ -1,3 +1,9 @@
+-------------------- 1.7 beta [2008-12-06] ---------------------
+2008-12-06  Ali Farhadi <ali@farhadi.ir>
+	* minifiers/css.php: Issue #2 fixed (problem with mime_content_type function).
+	* config.php: gzip compression level can be set in config file.
+	* index.php: Content-Type of js files was changed for compatibility with all of browsers. (from application/x-javascript to text/javascript).
+
 -------------------- 1.6 beta [2008-06-13] ---------------------
 2008-06-13  Ali Farhadi <ali@farhadi.ir>
 	Change log and brief documentation added.

@@ -1,5 +1,5 @@
 <?php
-/* SmartOptimizer v1.6 beta
+/* SmartOptimizer v1.7 beta
  * SmartOptimizer enhances your website performance using techniques 
  * such as compression, concatenation, minifying, caching, and embedding on demand.
  * 
@@ -17,6 +17,7 @@ $settings = array(
 	'charSet' => 'utf-8',
 	'debug' => true,
 	'gzip' => true,
+	'compressionLevel' => 9,
 	'gzipExceptions' => array('gif','jpeg','jpg','png','swf'),
 	'minify' => true,
 	'concatenate' => true,
@@ -33,7 +34,7 @@ $settings = array(
 	
 //mime types
 $mimeTypes = array(
-	"js"	=> "application/x-javascript",
+	"js"	=> "text/javascript",
 	"css"	=> "text/css",    
 	"htm"	=> "text/html",
 	"html"	=> "text/html",
@@ -179,7 +180,7 @@ if (!$settings['clientCache'] || !$settings['clientCacheCheck'] || !isset($_SERV
 		foreach ($files as $file) (($content[] = @file_get_contents($file)) !== false) || debugExit("File not found ($file).");
 		$content = implode("\n", $content);
 		if ($settings['minify']) $content = call_user_func('minify_' . $fileType, $content);
-		if ($settings['gzip']) $content = gzencode($content, 9);
+		if ($settings['gzip']) $content = gzencode($content, $settings['compressionLevel']);
 		if ($settings['serverCache']) {
 			$handle = @fopen($cachedFile, 'w') or debugExit("Could not create cache file($cachedFile).");
 			fwrite($handle, $content);
