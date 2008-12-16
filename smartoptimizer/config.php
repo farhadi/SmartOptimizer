@@ -37,6 +37,9 @@ $settings['embed'] = true;
 //The maximum size of an embedded file. (use 0 for unlimited size)
 $settings['embedMaxSize'] = 5120; //5KB
 
+//these types of files will not be embedded
+$settings['embedExceptions'] = array('htc'); 
+
 //to set server-side cache On or Off
 $settings['serverCache'] = true;
 

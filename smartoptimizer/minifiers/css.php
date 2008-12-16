@@ -22,6 +22,7 @@ function convertUrl($url, $count)
 		!file_exists($fileDir.$url) ||
 		($settings['embedMaxSize'] > 0 && filesize($fileDir.$url) > $settings['embedMaxSize']) ||
 		!$fileType ||
+		in_array($fileType, $settings['embedExceptions']) ||
 		!$mimeType ||
 		$count > 1) {
 		if (strpos($_SERVER['REQUEST_URI'], $_SERVER['SCRIPT_NAME'].'?') === 0 ||

@@ -24,6 +24,7 @@ $settings = array(
 	'separator' => ',',
 	'embed' => true,
 	'embedMaxSize' => 5120,
+	'embedExceptions' => array('htc'),
 	'serverCache' => true,
 	'serverCacheCheck' => false,
 	'cacheDir' => 'cache/',
