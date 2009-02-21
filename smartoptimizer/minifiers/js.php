@@ -80,7 +80,7 @@ function minify_js($str) {
 				(
 				preg_match('/^[^({[=+\-*%&|!><?:~^,;\/][^)}\]=+\-*%&|><?:,;\/]$/', $res[strlen($res)-1].$str[$i+1]) ||
 				(strlen($res)>1 && preg_match('/^(\+\+)|(--)$/', $res[strlen($res)-2].$res[strlen($res)-1])) ||
-				preg_match('/^(\+\+)|(--)$/', $current_char.$str[$i+1]) ||
+				(strlen($str)>$i+2 && preg_match('/^(\+\+)|(--)$/', $str[$i+1].$str[$i+2])) ||
 				preg_match('/^(\+\+)|(--)$/', $res[strlen($res)-1].$str[$i+1])// || // for example i+ ++j;
 				)) $res .= $current_char;
 		} else $res .= $current_char;
