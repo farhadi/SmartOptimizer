@@ -43,7 +43,7 @@ function minify_js($str) {
 			else $str[$i] = ' ';
 		} elseif ($str[$i].$str[$i+1]=='//') {//single-line comment detected
 			$i+=2;
-			while ($i<strlen($str) && $str[$i]!="\n") $i++;
+			while ($i<strlen($str) && $str[$i]!="\n" && $str[$i]!="\r") $i++;
 		}
 		
 
