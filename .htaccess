@@ -1,5 +1,5 @@
 <IfModule mod_expires.c>
-	<FilesMatch "\.(gif|jpg|jpeg|png|swf|css|js|html?|xml|txt)$">
+	<FilesMatch "\.(gif|jpg|jpeg|png|swf|css|js|html?|xml|txt|ico)$">
 		ExpiresActive On
 		ExpiresDefault "access plus 10 years"
 	</FilesMatch>
@@ -18,9 +18,9 @@
 
 	<IfModule !mod_expires.c>
 		RewriteCond %{REQUEST_FILENAME} -f
-		RewriteRule ^(.*\.(gif|jpg|jpeg|png|swf|css|js|html?|xml|txt))$ smartoptimizer/?$1
+		RewriteRule ^(.*\.(gif|jpg|jpeg|png|swf|css|js|html?|xml|txt|ico))$ smartoptimizer/?$1
 	</IfModule>
 </IfModule>
-<FilesMatch "\.(gif|jpg|jpeg|png|swf|css|js|html?|xml|txt)$">
+<FilesMatch "\.(gif|jpg|jpeg|png|swf|css|js|html?|xml|txt|ico)$">
 	FileETag none
 </FilesMatch>

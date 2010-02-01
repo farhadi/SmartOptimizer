@@ -18,7 +18,7 @@ $settings = array(
 	'debug' => true,
 	'gzip' => true,
 	'compressionLevel' => 9,
-	'gzipExceptions' => array('gif','jpeg','jpg','png','swf'),
+	'gzipExceptions' => array('gif','jpeg','jpg','png','swf','ico'),
 	'minify' => true,
 	'concatenate' => true,
 	'separator' => ',',
@@ -46,6 +46,7 @@ $mimeTypes = array(
 	"png"	=> "image/png",
 	"gif"	=> "image/gif",
 	"swf"	=> "application/x-shockwave-flash",
+	"ico"	=> "image/x-icon",
 );
 
 function headerExit($status) {
