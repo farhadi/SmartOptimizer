@@ -49,8 +49,8 @@ Bug reports
 SmartOptimizer is in beta stage and needs a large scale testing specially for its css and js minifiers.
 So any feedback is greatly appreciated.
 
-Use the project page at googlecode for bug reports:
-http://code.google.com/p/smartoptimizer/
+Use the issue tracker at github for bug reports:
+http://github.com/farhadi/SmartOptimizer/issues
 
 
 

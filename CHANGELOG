@@ -1,3 +1,5 @@
+NOTE: I'm not going to update this file any more. Use git-log instead.
+
 -------------------- 1.7 beta [2008-12-06] ---------------------
 2008-12-16  Ali Farhadi <ali@farhadi.ir>
 	* ability to ignore some file types (e.g. htc) from being embedded through embedExceptions config.
