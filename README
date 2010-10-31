@@ -1,4 +1,4 @@
-SmartOptimizer v1.7 beta
+SmartOptimizer v1.8
 ------------------------
 Author: Ali Farhadi (http://farhadi.ir/)
 Released under the terms of the GNU Public License.
@@ -7,18 +7,18 @@ See the GPL for details (http://www.gnu.org/licenses/gpl.html).
 
 What is SmartOptimizer?
 -----------------------
-SmartOptimizer is a php program that enhances your website performance using 
+SmartOptimizer is a php program that enhances your website performance using
 techniques such as minifying, compression, caching, concatenation and embedding.
 The idea is based on yahoo performace rules (http://developer.yahoo.com/performance/rules.html).
 
 
 SmartOptimizer Features
 -----------------------
-* SmartOptimizer Increases your website download speed by reducing the size of JavaScript and 
+* SmartOptimizer Increases your website download speed by reducing the size of JavaScript and
   CSS files approximately up to 80% or even higher.
 * Reduces count of http requests by combining js/css files together.
 * Also reduces count of http requests by embedding css images inside css files.
-* SmartOptimizer generates minified, compressed, combined and embedded files on the 
+* SmartOptimizer generates minified, compressed, combined and embedded files on the
   first request and caches them on the server and uses the cache on future requests.
 * It doesn't embed duplicated urls (i.e. css sprites) in css files for better performance.
 * It also knows to regenerate already cached files if the originals have been changed.
@@ -51,6 +51,3 @@ So any feedback is greatly appreciated.
 
 Use the issue tracker at github for bug reports:
 http://github.com/farhadi/SmartOptimizer/issues
-
-
-

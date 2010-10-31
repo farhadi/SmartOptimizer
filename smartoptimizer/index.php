@@ -1,18 +1,18 @@
 <?php
-/* SmartOptimizer v1.7 beta
- * SmartOptimizer enhances your website performance using techniques 
+/* SmartOptimizer v1.8
+ * SmartOptimizer enhances your website performance using techniques
  * such as compression, concatenation, minifying, caching, and embedding on demand.
- * 
- * Copyright (c) 2006-2008 Ali Farhadi (http://farhadi.ir/)
+ *
+ * Copyright (c) 2006-2010 Ali Farhadi (http://farhadi.ir/)
  * Released under the terms of the GNU Public License.
  * See the GPL for details (http://www.gnu.org/licenses/gpl.html).
  *
- * Author: Ali Farhadi (ali@farhadi.ir)
+ * Author: Ali Farhadi (a.farhadi@gmail.com)
  * Website: http://farhadi.ir/
  */
 
 //Default settings
-$settings = array(	
+$settings = array(
 	'baseDir' => '../',
 	'charSet' => 'utf-8',
 	'debug' => true,
@@ -28,15 +28,15 @@ $settings = array(
 	'serverCache' => true,
 	'serverCacheCheck' => false,
 	'cacheDir' => 'cache/',
-	'cachePrefix' => 'so_',  
+	'cachePrefix' => 'so_',
 	'clientCache' => true,
 	'clientCacheCheck' => false,
 );
-	
+
 //mime types
 $mimeTypes = array(
 	"js"	=> "text/javascript",
-	"css"	=> "text/css",    
+	"css"	=> "text/css",
 	"htm"	=> "text/html",
 	"html"	=> "text/html",
 	"xml"	=> "text/xml",
@@ -60,15 +60,15 @@ function headerNoCache() {
 
 	// always modified
 	header("Last-Modified: " . gmdatestr());
-	
+
 	// HTTP/1.1
 	header("Cache-Control: no-store, no-cache, must-revalidate");
 	header("Cache-Control: post-check=0, pre-check=0", false);
 	header("Cache-Control: max-age=0", false);
-	
+
 	// HTTP/1.0
 	header("Pragma: no-cache");
-	
+
 	//generate a unique Etag each time
 	header('Etag: '.microtime());
 }
@@ -101,10 +101,10 @@ function filesmtime() {
 	global $files, $fileType;
 	static $filesmtime;
 	if ($filesmtime) return $filesmtime;
-	$filesmtime = max(@filemtime("minifiers/$fileType.php"), filemtime('index.php'), filemtime('config.php')); 
+	$filesmtime = max(@filemtime("minifiers/$fileType.php"), filemtime('index.php'), filemtime('config.php'));
 	foreach ($files as $file) {
 		if (!file_exists($file)) debugExit("File not found ($file).");
-		$filesmtime = max(filemtime($file), $filesmtime); 
+		$filesmtime = max(filemtime($file), $filesmtime);
 	}
 	return $filesmtime;
 }
@@ -129,7 +129,7 @@ foreach ($files as $key => $file) {
 	if (preg_match('/\.([a-z0-9]+)$/i', $file, $matchResult)) {
 		$fileTypes[] = strtolower($matchResult[1]);
 	} else debugExit("Unsupported file ($file)");
-	
+
 	$files[$key] = $fileDir.$file;
 }
 
@@ -142,12 +142,12 @@ $fileType = $fileTypes[0];
 if (!isset($mimeTypes[$fileType])) debugExit("Unsupported file type ($fileType)");
 header("Content-Type: {$mimeTypes[$fileType]}; charset=".$settings['charSet']);
 
-$settings['gzip'] = 
+$settings['gzip'] =
 	($settings['gzip'] &&
 	!in_array($fileType, $settings['gzipExceptions']) &&
 	in_array('gzip', array_map('trim', explode(',' , @$_SERVER['HTTP_ACCEPT_ENCODING']))) &&
 	function_exists('gzencode'));
-	
+
 if ($settings['gzip']) header("Content-Encoding: gzip");
 
 $settings['minify'] = $settings['minify'] && file_exists('minifiers/'.$fileType.'.php');
@@ -158,9 +158,9 @@ if ($settings['serverCache']) {
 	$cachedFile = $settings['cacheDir'].$settings['cachePrefix'].md5($query.($settings['embed']?'1':'0')).'.'.$fileType.($settings['gzip'] ? '.gz' : '');
 }
 
-$generateContent = ((!$settings['serverCache'] && (!$settings['clientCache'] || !$settings['clientCacheCheck'] || !isset($_SERVER['HTTP_IF_MODIFIED_SINCE']) || $_SERVER['HTTP_IF_MODIFIED_SINCE'] != gmdatestr(filesmtime()))) || 
+$generateContent = ((!$settings['serverCache'] && (!$settings['clientCache'] || !$settings['clientCacheCheck'] || !isset($_SERVER['HTTP_IF_MODIFIED_SINCE']) || $_SERVER['HTTP_IF_MODIFIED_SINCE'] != gmdatestr(filesmtime()))) ||
 	($settings['serverCache'] && (!file_exists($cachedFile) || ($settings['serverCacheCheck'] && filesmtime() > filemtime($cachedFile)))));
-	 
+
 if ($settings['clientCache'] && $settings['clientCacheCheck']) {
 	if ($settings['serverCache'] && !$generateContent) $mtime = filemtime($cachedFile);
 	elseif ($settings['serverCache']) $mtime = time();
@@ -175,7 +175,7 @@ if (!$settings['clientCache'] || !$settings['clientCacheCheck'] || !isset($_SERV
 	} elseif ($settings['clientCache']) {
 		headerNeverExpire();
 	} else headerNoCache();
-	
+
 	if ($generateContent) {
 		if ($settings['minify']) include('minifiers/'.$fileType.'.php');
 		$content = array();
@@ -188,12 +188,12 @@ if (!$settings['clientCache'] || !$settings['clientCacheCheck'] || !isset($_SERV
 			fwrite($handle, $content);
 			fclose($handle);
 		}
-		header('Content-Length: ' . strlen($content)); 
+		header('Content-Length: ' . strlen($content));
 		echo $content;
 	} else {
 		header('Content-Length: ' . filesize($cachedFile));
 		readfile($cachedFile);
 	}
-} else headerExit('304 Not Modified'); 
+} else headerExit('304 Not Modified');
 
 ?>
