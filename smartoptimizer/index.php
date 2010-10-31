@@ -126,7 +126,7 @@ if ($settings['concatenate']) {
 } else $files = array($fileNames);
 
 foreach ($files as $key => $file) {
-	if (preg_match('/\.([a-z0-9]+)$/i', $file, $matchResult)) {
+	if (preg_match('/^[^\x00]+\.([a-z0-9]+)$/i', $file, $matchResult)) {
 		$fileTypes[] = strtolower($matchResult[1]);
 	} else debugExit("Unsupported file ($file)");
 
