@@ -30,7 +30,7 @@ $settings = array(
 	'cacheDir' => 'cache/',
 	'cachePrefix' => 'so_',
 	'clientCache' => true,
-	'clientCacheCheck' => false,
+	'clientCacheCheck' => false
 );
 
 //mime types
@@ -113,15 +113,30 @@ function filesmtime() {
 
 list($query) = explode('?', urldecode($_SERVER['QUERY_STRING']));
 
-if (preg_match('/^\/?(.+\/)?(.+)$/', $query, $matchResult)) {
-	$fileNames = $matchResult[2];
-	$fileDir = $settings['baseDir'].$matchResult[1];
-} else debugExit("Invalid file name ($query)");
+if(isset($settings['groups']) && substr($query, 0, 6) == 'group.'){
+	//we have a pre-defined group to include
+	$group_name = str_replace('group.','',$query);
+	if(isset($settings['groups'][$group_name])) {
+		$fileNames = $settings['groups'][$group_name];
+		$fileDir = '';
+	}
+	else debugExit("Group ($group_name) not set. Please edit config.");
+} else {
+	if (preg_match('/^\/?(.+\/)?(.+)$/', $query, $matchResult)) {
+		$fileNames = $matchResult[2];
+		$fileDir = $settings['baseDir'].$matchResult[1];
+	} else debugExit("Invalid file name ($query)");
+} 
 
-if (strpos(realpath($fileDir), realpath($settings['baseDir'])) !== 0) debugExit("File is out of base directory.");
+//if (strpos(realpath($fileDir), realpath($settings['baseDir'])) !== 0) debugExit("File is out of base directory.");
 
 if ($settings['concatenate']) {
-	$files = explode($settings['separator'], $fileNames);
+	if(!is_array($fileNames)){
+		$files = explode($settings['separator'], $fileNames);
+	}
+	else{
+		$files = $fileNames;
+	}
 	$settings['concatenate'] = count($files) > 1;
 } else $files = array($fileNames);
 
