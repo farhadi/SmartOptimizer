@@ -57,13 +57,13 @@ $settings['clientCache'] = true;
 //Setting this to false will force the browser to use cached files without checking for changes.
 $settings['clientCacheCheck'] = false;
 
+//To use groups effectively, include your files with absolute paths. Define constants for easy access. 
+define('MY_JS_DIR', $_SERVER['DOCUMENT_ROOT'] . '/tkitt/js/');
+define('MY_CSS_DIR', $_SERVER['DOCUMENT_ROOT'] . '/tkitt/css/');
+
 //groups configuration. Call a group by using /path/to/smartoptimizer/?group.group_name.
 //Tip: If you use 'test.js' as your group name, you'll get a nifty file name like 'group.test.js' 
 $settings['groups'] = array(
 	//'test.js' => array(MY_JS_DIR.'test.js', MY_JS_DIR.'test2.js')
 	//'test.css' => array(MY_JS_DIR.'style.css', MY_JS_DIR.'print.css')
 );
-
-//To use groups effectively, include your files with absolute paths. Define constants for easy access. 
-define('MY_JS_DIR', $_SERVER['DOCUMENT_ROOT'] . '/tkitt/js/');
-define('MY_CSS_DIR', $_SERVER['DOCUMENT_ROOT'] . '/tkitt/css/');
