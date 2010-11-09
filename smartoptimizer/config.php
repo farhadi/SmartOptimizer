@@ -3,9 +3,8 @@
  * SmartOptimizer Configuration File
  */
 
-
 //base dir (a relative path to the base directory)
-$settings['baseDir'] = '../';
+$settings['baseDir'] = '';
 
 //Encoding of your js and css files. (utf-8 or iso-8859-1)
 $settings['charSet'] = 'utf-8'; 
@@ -28,7 +27,7 @@ $settings['minify'] = true;
 //use this to set file concatenation On or Off
 $settings['concatenate'] = true;
 
-//separator for files to be concatenated
+//separator for files to be concatenated. Tip: Don't use '.' if you use groups and name them like suggested.
 $settings['separator'] = ',';
 
 //specifies whether to emebed files included in css files using the data URI scheme or not 
@@ -57,4 +56,20 @@ $settings['clientCache'] = true;
 
 //Setting this to false will force the browser to use cached files without checking for changes.
 $settings['clientCacheCheck'] = false;
-?>
+
+//Minifier to use when parsing js files. Add yours in /minifiers directory, and implement function minify_js($text_to_minify)
+$settings['jsMinifier'] = 'packer';
+
+//Minifier to use when parsing css files. Add yours in /minifiers directory, and implement function minify_css($text_to_minify)
+$settings['cssMinifier'] = 'css';
+
+//To use groups effectively, include your files with absolute paths. Define constants for easy access. 
+define('MY_JS_DIR', $_SERVER['DOCUMENT_ROOT'] . '/tkitt/js/');
+define('MY_CSS_DIR', $_SERVER['DOCUMENT_ROOT'] . '/tkitt/css/');
+
+//groups configuration. Call a group by using /path/to/smartoptimizer/?group.group_name.
+//Tip: If you use 'test.js' as your group name, you'll get a nifty file name like 'group.test.js' 
+$settings['groups'] = array(
+	'test.js' => array(MY_JS_DIR.'test.js', MY_JS_DIR.'test2.js'),
+	'test.css' => array(MY_JS_DIR.'style.css', MY_JS_DIR.'print.css')
+);
