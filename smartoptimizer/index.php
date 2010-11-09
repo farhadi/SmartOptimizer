@@ -30,7 +30,9 @@ $settings = array(
 	'cacheDir' => 'cache/',
 	'cachePrefix' => 'so_',
 	'clientCache' => true,
-	'clientCacheCheck' => false
+	'clientCacheCheck' => false,
+	'jsMinifier' => 'js',
+	'cssMinifier' => 'css'
 );
 
 //mime types
@@ -98,10 +100,10 @@ function gmdatestr($time = null) {
 }
 
 function filesmtime() {
-	global $files, $fileType;
+	global $files, $fileMinifier;
 	static $filesmtime;
 	if ($filesmtime) return $filesmtime;
-	$filesmtime = max(@filemtime("minifiers/$fileType.php"), filemtime('index.php'), filemtime('config.php'));
+	$filesmtime = max(@filemtime("minifiers/$fileMinifier.php"), filemtime('index.php'), filemtime('config.php'));
 	foreach ($files as $file) {
 		if (!file_exists($file)) debugExit("File not found ($file).");
 		$filesmtime = max(filemtime($file), $filesmtime);
@@ -153,6 +155,8 @@ if ($settings['concatenate']) {
 }
 
 $fileType = $fileTypes[0];
+$fileMinifier = $settings[$fileType.'Minifier'];
+if(!file_exists('minifiers/'.$fileMinifier.'.php')) debugExit($fileType.'Minifier not found. Please create "minifiers/'.$fileMinifier.'.php" or change minifier in config.php');
 
 if (!isset($mimeTypes[$fileType])) debugExit("Unsupported file type ($fileType)");
 header("Content-Type: {$mimeTypes[$fileType]}; charset=".$settings['charSet']);
@@ -165,7 +169,7 @@ $settings['gzip'] =
 
 if ($settings['gzip']) header("Content-Encoding: gzip");
 
-$settings['minify'] = $settings['minify'] && file_exists('minifiers/'.$fileType.'.php');
+$settings['minify'] = $settings['minify'] && file_exists('minifiers/'.$fileMinifier.'.php');
 $settings['embed'] = $settings['embed'] && $fileType == 'css' && (!preg_match('/msie/i', $_SERVER['HTTP_USER_AGENT']) || preg_match('/msie 8|opera/i', $_SERVER['HTTP_USER_AGENT']));
 $settings['serverCache'] = $settings['serverCache'] && ($settings['minify'] || $settings['gzip'] || $settings['concatenate'] || $settings['embed']);
 
@@ -192,7 +196,7 @@ if (!$settings['clientCache'] || !$settings['clientCacheCheck'] || !isset($_SERV
 	} else headerNoCache();
 
 	if ($generateContent) {
-		if ($settings['minify']) include('minifiers/'.$fileType.'.php');
+		if ($settings['minify']) include('minifiers/'.$fileMinifier.'.php');
 		$content = array();
 		foreach ($files as $file) (($content[] = @file_get_contents($file)) !== false) || debugExit("File not found ($file).");
 		$content = implode("\n", $content);
