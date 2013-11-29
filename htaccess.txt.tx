@@ -1,7 +1,7 @@
 <IfModule mod_expires.c>
 	<FilesMatch "\.(gif|jpg|jpeg|png|swf|css|js|html?|xml|txt|ico)$">
 		ExpiresActive On
-		ExpiresDefault "access plus 10 years"
+		ExpiresDefault "access plus 1 years"
 	</FilesMatch>
 </IfModule>
 <IfModule mod_rewrite.c>

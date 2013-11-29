@@ -111,14 +111,14 @@ function filesmtime() {
 	return $filesmtime;
 }
 
-@include('config.php');
+require 'config.php';
 
 list($query) = explode('?', urldecode($_SERVER['QUERY_STRING']));
 
 if(isset($settings['groups']) && substr($query, 0, 6) == 'group.'){
 	//we have a pre-defined group to include
 	$group_name = str_replace('group.','',$query);
-	if(isset($settings['groups'][$group_name])) {
+	if(isset($settings['groups'][$group_name])){
 		$fileNames = $settings['groups'][$group_name];
 		$fileDir = '';
 	}
@@ -134,9 +134,8 @@ if(isset($settings['groups']) && substr($query, 0, 6) == 'group.'){
 
 if ($settings['concatenate']) {
 	if(!is_array($fileNames)){
-		$files = explode($settings['separator'], $fileNames);
-	}
-	else{
+            $files = explode($settings['separator'], $fileNames);
+	} else {
 		$files = $fileNames;
 	}
 	$settings['concatenate'] = count($files) > 1;
@@ -196,7 +195,10 @@ if (!$settings['clientCache'] || !$settings['clientCacheCheck'] || !isset($_SERV
 	} else headerNoCache();
 
 	if ($generateContent) {
-		if ($settings['minify']) include('minifiers/'.$fileMinifier.'.php');
+                if ($settings['minify']){
+                    include 'minifiers/'.$fileMinifier.'.php';
+                    
+                }
 		$content = array();
 		foreach ($files as $file) (($content[] = @file_get_contents($file)) !== false) || debugExit("File not found ($file).");
 		$content = implode("\n", $content);
@@ -214,5 +216,4 @@ if (!$settings['clientCache'] || !$settings['clientCacheCheck'] || !isset($_SERV
 		readfile($cachedFile);
 	}
 } else headerExit('304 Not Modified');
-
 ?>
