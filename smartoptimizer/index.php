@@ -31,6 +31,8 @@ $settings = array(
 	'cachePrefix' => 'so_',
 	'clientCache' => true,
 	'clientCacheCheck' => false,
+	'jsMinifier' => 'js',
+	'cssMinifier' => 'css'
 );
 
 //mime types
@@ -98,10 +100,10 @@ function gmdatestr($time = null) {
 }
 
 function filesmtime() {
-	global $files, $fileType;
+	global $files, $fileMinifier;
 	static $filesmtime;
 	if ($filesmtime) return $filesmtime;
-	$filesmtime = max(@filemtime("minifiers/$fileType.php"), filemtime('index.php'), filemtime('config.php'));
+	$filesmtime = max(@filemtime("minifiers/$fileMinifier.php"), filemtime('index.php'), filemtime('config.php'));
 	foreach ($files as $file) {
 		if (!file_exists($file)) debugExit("File not found ($file).");
 		$filesmtime = max(filemtime($file), $filesmtime);
@@ -113,15 +115,30 @@ function filesmtime() {
 
 list($query) = explode('?', urldecode($_SERVER['QUERY_STRING']));
 
-if (preg_match('/^\/?(.+\/)?(.+)$/', $query, $matchResult)) {
-	$fileNames = $matchResult[2];
-	$fileDir = $settings['baseDir'].$matchResult[1];
-} else debugExit("Invalid file name ($query)");
+if(isset($settings['groups']) && substr($query, 0, 6) == 'group.'){
+	//we have a pre-defined group to include
+	$group_name = str_replace('group.','',$query);
+	if(isset($settings['groups'][$group_name])) {
+		$fileNames = $settings['groups'][$group_name];
+		$fileDir = '';
+	}
+	else debugExit("Group ($group_name) not set. Please edit config.");
+} else {
+	if (preg_match('/^\/?(.+\/)?(.+)$/', $query, $matchResult)) {
+		$fileNames = $matchResult[2];
+		$fileDir = $settings['baseDir'].$matchResult[1];
+	} else debugExit("Invalid file name ($query)");
+} 
 
-if (strpos(realpath($fileDir), realpath($settings['baseDir'])) !== 0) debugExit("File is out of base directory.");
+//if (strpos(realpath($fileDir), realpath($settings['baseDir'])) !== 0) debugExit("File is out of base directory.");
 
 if ($settings['concatenate']) {
-	$files = explode($settings['separator'], $fileNames);
+	if(!is_array($fileNames)){
+		$files = explode($settings['separator'], $fileNames);
+	}
+	else{
+		$files = $fileNames;
+	}
 	$settings['concatenate'] = count($files) > 1;
 } else $files = array($fileNames);
 
@@ -138,6 +155,8 @@ if ($settings['concatenate']) {
 }
 
 $fileType = $fileTypes[0];
+$fileMinifier = $settings[$fileType.'Minifier'];
+if(!file_exists('minifiers/'.$fileMinifier.'.php')) debugExit($fileType.'Minifier not found. Please create "minifiers/'.$fileMinifier.'.php" or change minifier in config.php');
 
 if (!isset($mimeTypes[$fileType])) debugExit("Unsupported file type ($fileType)");
 header("Content-Type: {$mimeTypes[$fileType]}; charset=".$settings['charSet']);
@@ -150,7 +169,7 @@ $settings['gzip'] =
 
 if ($settings['gzip']) header("Content-Encoding: gzip");
 
-$settings['minify'] = $settings['minify'] && file_exists('minifiers/'.$fileType.'.php');
+$settings['minify'] = $settings['minify'] && file_exists('minifiers/'.$fileMinifier.'.php');
 $settings['embed'] = $settings['embed'] && $fileType == 'css' && (!preg_match('/msie/i', $_SERVER['HTTP_USER_AGENT']) || preg_match('/msie 8|opera/i', $_SERVER['HTTP_USER_AGENT']));
 $settings['serverCache'] = $settings['serverCache'] && ($settings['minify'] || $settings['gzip'] || $settings['concatenate'] || $settings['embed']);
 
@@ -177,7 +196,7 @@ if (!$settings['clientCache'] || !$settings['clientCacheCheck'] || !isset($_SERV
 	} else headerNoCache();
 
 	if ($generateContent) {
-		if ($settings['minify']) include('minifiers/'.$fileType.'.php');
+		if ($settings['minify']) include('minifiers/'.$fileMinifier.'.php');
 		$content = array();
 		foreach ($files as $file) (($content[] = @file_get_contents($file)) !== false) || debugExit("File not found ($file).");
 		$content = implode("\n", $content);
