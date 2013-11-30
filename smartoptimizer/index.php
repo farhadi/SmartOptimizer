@@ -1,5 +1,5 @@
 <?php
-/* SmartOptimizer v1.8
+/** SmartOptimizer v1.8
  * SmartOptimizer enhances your website performance using techniques
  * such as compression, concatenation, minifying, caching, and embedding on demand.
  *
@@ -9,7 +9,13 @@
  *
  * Author: Ali Farhadi (a.farhadi@gmail.com)
  * Website: http://farhadi.ir/
- */
+ *
+ * 
+ * 
+ * @todo SET A MINIMUM FILE SIZE WHICH WILL NOT BE GZIPPED OR MINIFIED. 
+ * @todo EXCLUDE FILES WITH .min. in the filename - from minifying (they are already done)
+ * 
+ **/
 
 //Default settings
 $settings = array(
@@ -50,13 +56,28 @@ $mimeTypes = array(
 	"swf"	=> "application/x-shockwave-flash",
 	"ico"	=> "image/x-icon",
 );
+/**Processs a time in a string 
+ * 
+ * @param datetime $time
+ * @return string Date formatted
+ */
+
+function gmdatestr($time = null) {
+        if (is_null($time)){ $time = time();}
+	return gmdate("D, d M Y H:i:s", $time) . " GMT";
+}
+/**Adds a status header and then exits
+ * 
+ * @param string $status
+ */
 
 function headerExit($status) {
 	header("HTTP/1.0 $status");
 	exit();
 }
 
-function headerNoCache() {
+function headerNoCache()
+    {
 	// already expired
 	header("Expires: Mon, 26 Jul 1997 05:00:00 GMT");
 
@@ -76,8 +97,12 @@ function headerNoCache() {
 }
 
 function headerNeverExpire(){
-	header("Expires: " . gmdatestr(time() + 315360000));
-	header("Cache-Control: max-age=315360000");
+        $exptime = time()+ 31557600;
+        $curtime = time();        
+	header("Expires: " . gmdatestr($exptime));
+	header("Cache-Control: max-age=31557600");
+	header("Cache-Control: public");
+	header("Last-Modified: ". gmdatestr($curtime));
 }
 
 function debugExit($msg){
@@ -93,19 +118,22 @@ function debugExit($msg){
 	echo "//</script>\n";
 	exit();
 }
-
-function gmdatestr($time = null) {
-	if (is_null($time)) $time = time();
-	return gmdate("D, d M Y H:i:s", $time) . " GMT";
-}
+/**Gets the input files modification time and compares it to the modification time of /smartoptimizer/index.php and config.php
+ * and returns the larges of the 3 (ie the most recent time)
+ * 
+ * @global type $files
+ * @global type $fileType
+ * @staticvar type $filesmtime
+ * @return type
+ */
 
 function filesmtime() {
 	global $files, $fileMinifier;
 	static $filesmtime;
-	if ($filesmtime) return $filesmtime;
+        if ($filesmtime){return $filesmtime;}
 	$filesmtime = max(@filemtime("minifiers/$fileMinifier.php"), filemtime('index.php'), filemtime('config.php'));
 	foreach ($files as $file) {
-		if (!file_exists($file)) debugExit("File not found ($file).");
+                if (!file_exists($file)) {debugExit("File not found ($file).");}
 		$filesmtime = max(filemtime($file), $filesmtime);
 	}
 	return $filesmtime;
@@ -122,12 +150,12 @@ if(isset($settings['groups']) && substr($query, 0, 6) == 'group.'){
 		$fileNames = $settings['groups'][$group_name];
 		$fileDir = '';
 	}
-	else debugExit("Group ($group_name) not set. Please edit config.");
+        else {debugExit("Group ($group_name) not set. Please edit config.");}
 } else {
 	if (preg_match('/^\/?(.+\/)?(.+)$/', $query, $matchResult)) {
 		$fileNames = $matchResult[2];
 		$fileDir = $settings['baseDir'].$matchResult[1];
-	} else debugExit("Invalid file name ($query)");
+        } else {debugExit("Invalid file name ($query)");}
 } 
 
 //if (strpos(realpath($fileDir), realpath($settings['baseDir'])) !== 0) debugExit("File is out of base directory.");
@@ -139,34 +167,34 @@ if ($settings['concatenate']) {
 		$files = $fileNames;
 	}
 	$settings['concatenate'] = count($files) > 1;
-} else $files = array($fileNames);
+} else {$files = array($fileNames);}
 
 foreach ($files as $key => $file) {
 	if (preg_match('/^[^\x00]+\.([a-z0-9]+)$/i', $file, $matchResult)) {
 		$fileTypes[] = strtolower($matchResult[1]);
-	} else debugExit("Unsupported file ($file)");
+        } else {debugExit("Unsupported file ($file)");}
 
 	$files[$key] = $fileDir.$file;
 }
 
 if ($settings['concatenate']) {
-	if (count(array_unique($fileTypes)) > 1) debugExit("Files must be of the same type.");
+        if (count(array_unique($fileTypes)) > 1) {debugExit("Files must be of the same type.");}
 }
 
 $fileType = $fileTypes[0];
 $fileMinifier = $settings[$fileType.'Minifier'];
-if(!file_exists('minifiers/'.$fileMinifier.'.php')) debugExit($fileType.'Minifier not found. Please create "minifiers/'.$fileMinifier.'.php" or change minifier in config.php');
+if(!file_exists('minifiers/'.$fileMinifier.'.php')) {debugExit($fileType.'Minifier not found. Please create "minifiers/'.$fileMinifier.'.php" or change minifier in config.php');}
 
-if (!isset($mimeTypes[$fileType])) debugExit("Unsupported file type ($fileType)");
+if (!isset($mimeTypes[$fileType])){ debugExit("Unsupported file type ($fileType)");}
 header("Content-Type: {$mimeTypes[$fileType]}; charset=".$settings['charSet']);
 
 $settings['gzip'] =
 	($settings['gzip'] &&
 	!in_array($fileType, $settings['gzipExceptions']) &&
-	in_array('gzip', array_map('trim', explode(',' , @$_SERVER['HTTP_ACCEPT_ENCODING']))) &&
+	in_array('gzip', array_map('trim', explode(',' , $_SERVER['HTTP_ACCEPT_ENCODING']))) &&
 	function_exists('gzencode'));
 
-if ($settings['gzip']) header("Content-Encoding: gzip");
+if ($settings['gzip']){ header("Content-Encoding: gzip");}
 
 $settings['minify'] = $settings['minify'] && file_exists('minifiers/'.$fileMinifier.'.php');
 $settings['embed'] = $settings['embed'] && $fileType == 'css' && (!preg_match('/msie/i', $_SERVER['HTTP_USER_AGENT']) || preg_match('/msie 8|opera/i', $_SERVER['HTTP_USER_AGENT']));
@@ -180,9 +208,9 @@ $generateContent = ((!$settings['serverCache'] && (!$settings['clientCache'] || 
 	($settings['serverCache'] && (!file_exists($cachedFile) || ($settings['serverCacheCheck'] && filesmtime() > filemtime($cachedFile)))));
 
 if ($settings['clientCache'] && $settings['clientCacheCheck']) {
-	if ($settings['serverCache'] && !$generateContent) $mtime = filemtime($cachedFile);
-	elseif ($settings['serverCache']) $mtime = time();
-	else $mtime = filesmtime();
+        if ($settings['serverCache'] && !$generateContent) {$mtime = filemtime($cachedFile);}
+elseif ($settings['serverCache']) {$mtime = time();}
+        else {$mtime = filesmtime();}
 	$mtimestr = gmdatestr($mtime);
 }
 
@@ -192,7 +220,7 @@ if (!$settings['clientCache'] || !$settings['clientCacheCheck'] || !isset($_SERV
 		header("Cache-Control: must-revalidate");
 	} elseif ($settings['clientCache']) {
 		headerNeverExpire();
-	} else headerNoCache();
+        } else { headerNoCache();}
 
 	if ($generateContent) {
                 if ($settings['minify']){
@@ -200,20 +228,23 @@ if (!$settings['clientCache'] || !$settings['clientCacheCheck'] || !isset($_SERV
                     
                 }
 		$content = array();
-		foreach ($files as $file) (($content[] = @file_get_contents($file)) !== false) || debugExit("File not found ($file).");
+                foreach ($files as $file){(($content[] = file_get_contents($file)) !== false) || debugExit("File not found ($file).");}
 		$content = implode("\n", $content);
-		if ($settings['minify']) $content = call_user_func('minify_' . $fileType, $content);
-		if ($settings['gzip']) $content = gzencode($content, $settings['compressionLevel']);
+        if ($settings['minify']) {$content = call_user_func('minify_' . $fileType, $content);}
+                if ($settings['gzip']){ $content = gzencode($content, $settings['compressionLevel']);}
 		if ($settings['serverCache']) {
 			$handle = @fopen($cachedFile, 'w') or debugExit("Could not create cache file($cachedFile).");
 			fwrite($handle, $content);
 			fclose($handle);
 		}
 		header('Content-Length: ' . strlen($content));
+		header("Cache-Control: public");
+		header("Last-Modified: ". gmdatestr(filesmtime()));
 		echo $content;
 	} else {
 		header('Content-Length: ' . filesize($cachedFile));
+		header("Cache-Control: public");
+		header("Last-Modified: ". gmdatestr(filesmtime()));
 		readfile($cachedFile);
 	}
-} else headerExit('304 Not Modified');
-?>
+} else {headerExit('304 Not Modified');}
