@@ -1,7 +1,7 @@
 <?php
-/*
+/**
  * SmartOptimizer Configuration File
- */
+ **/
 
 //base dir (a relative path to the base directory)
 $settings['baseDir'] = '';
