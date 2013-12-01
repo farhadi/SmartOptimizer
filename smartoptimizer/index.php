@@ -101,14 +101,15 @@ function headerNoCache()
  * Adds header to the response informing that the file never expires cache it forever.
  */
 
-function headerNeverExpire(){
-        $exptime = time()+ 31557600;
-        $curtime = time();        
-	header("Expires: " . gmdatestr($exptime));
-	header("Cache-Control: max-age=31557600");
-	header("Cache-Control: public");
-	header("Last-Modified: ". gmdatestr($curtime));
+function headerNeverExpire() {
+    $exptime = time() + 31557600;
+    $curtime = time();
+    header("Expires: " . gmdatestr($exptime));
+    header("Cache-Control: public, max-age=31557600");
+    header("Last-Modified: " . gmdatestr($curtime));
+    header("Vary: Accept-Encoding");
 }
+
 /**
  * Adds Headers to a file pls echo a Error that smartoptimizer couldnt process the file
  * If Debug is set true this will 404 the file else it will return the file with a Script header.
@@ -254,13 +255,9 @@ if (!$settings['clientCache'] || !$settings['clientCacheCheck'] || !isset($_SERV
 			fclose($handle);
 		}
 		header('Content-Length: ' . strlen($content));
-		header("Cache-Control: public");
-		header("Last-Modified: ". gmdatestr(filesmtime()));
 		echo $content;
 	} else {
 		header('Content-Length: ' . filesize($cachedFile));
-		header("Cache-Control: public");
-		header("Last-Modified: ". gmdatestr(filesmtime()));
 		readfile($cachedFile);
 	}
 } else {headerExit('304 Not Modified');}
