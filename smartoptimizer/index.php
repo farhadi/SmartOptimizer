@@ -75,7 +75,9 @@ function headerExit($status) {
 	header("HTTP/1.0 $status");
 	exit();
 }
-
+/**
+ * Adds Headers to a returning HTTP response that tells a server not to cache the file ever
+ **/
 function headerNoCache()
     {
 	// already expired
@@ -95,6 +97,9 @@ function headerNoCache()
 	//generate a unique Etag each time
 	header('Etag: '.microtime());
 }
+/**
+ * Adds header to the response informing that the file never expires cache it forever.
+ */
 
 function headerNeverExpire(){
         $exptime = time()+ 31557600;
@@ -104,34 +109,41 @@ function headerNeverExpire(){
 	header("Cache-Control: public");
 	header("Last-Modified: ". gmdatestr($curtime));
 }
-
-function debugExit($msg){
-	global $settings;
-	if (!$settings['debug']) {
-		headerExit('404 Not Found');
-	}
-	headerNoCache();
-	header('Content-Type: text/html; charset='.$settings['charSet']);
-	header("Content-Encoding: none");
-	echo "//<script>\n";
-	echo "alert('SmartOptimizer Error: ".str_replace("\n", "\\n", addslashes($msg))."');\n";
-	echo "//</script>\n";
-	exit();
+/**
+ * Adds Headers to a file pls echo a Error that smartoptimizer couldnt process the file
+ * If Debug is set true this will 404 the file else it will return the file with a Script header.
+ * 
+ * @global array $settings
+ * @param string  $msg   The message to ruturn if Debug is false
+ */
+function debugExit($msg) {
+    global $settings;
+    if (!$settings['debug']) {
+        headerExit('404 Not Found');
+    }
+    headerNoCache();
+    header('Content-Type: text/html; charset=' . $settings['charSet']);
+    header("Content-Encoding: none");
+    echo "//<script>\n";
+    echo "alert('SmartOptimizer Error: " . str_replace("\n", "\\n", addslashes($msg)) . "');\n";
+    echo "//</script>\n";
+    exit();
 }
+
 /**Gets the input files modification time and compares it to the modification time of /smartoptimizer/index.php and config.php
  * and returns the larges of the 3 (ie the most recent time)
  * 
- * @global type $files
- * @global type $fileType
- * @staticvar type $filesmtime
- * @return type
- */
+ * @global array $files  
+ * @global string $fileType
+ * @staticvar datetime $filesmtime
+ * @return datetime
+ **/
 
 function filesmtime() {
 	global $files, $fileMinifier;
 	static $filesmtime;
         if ($filesmtime){return $filesmtime;}
-	$filesmtime = max(@filemtime("minifiers/$fileMinifier.php"), filemtime('index.php'), filemtime('config.php'));
+	$filesmtime = max(filemtime("minifiers/$fileMinifier.php"), filemtime('index.php'), filemtime('config.php'));
 	foreach ($files as $file) {
                 if (!file_exists($file)) {debugExit("File not found ($file).");}
 		$filesmtime = max(filemtime($file), $filesmtime);
@@ -143,22 +155,24 @@ require 'config.php';
 
 list($query) = explode('?', urldecode($_SERVER['QUERY_STRING']));
 
-if(isset($settings['groups']) && substr($query, 0, 6) == 'group.'){
-	//we have a pre-defined group to include
-	$group_name = str_replace('group.','',$query);
-	if(isset($settings['groups'][$group_name])){
-		$fileNames = $settings['groups'][$group_name];
-		$fileDir = '';
-	}
-        else {debugExit("Group ($group_name) not set. Please edit config.");}
+//if(isset($settings['groups']) && substr($query, 0, 6) == 'group.'){
+//	//we have a pre-defined group to include
+//	$group_name = str_replace('group.','',$query);
+//	if(isset($settings['groups'][$group_name])){
+//		$fileNames = $settings['groups'][$group_name];
+//		$fileDir = '';
+//	}
+//        else {debugExit("Group ($group_name) not set. Please edit config.");}
+//} else {
+if (preg_match('/^\/?(.+\/)?(.+)$/', $query, $matchResult)) {
+    $fileNames = $matchResult[2];
+    $fileDir = $settings['baseDir'] . $matchResult[1];
 } else {
-	if (preg_match('/^\/?(.+\/)?(.+)$/', $query, $matchResult)) {
-		$fileNames = $matchResult[2];
-		$fileDir = $settings['baseDir'].$matchResult[1];
-        } else {debugExit("Invalid file name ($query)");}
-} 
-
-//if (strpos(realpath($fileDir), realpath($settings['baseDir'])) !== 0) debugExit("File is out of base directory.");
+    debugExit("Invalid file name ($query)");
+}
+//} 
+//check the file exists and is relative to the base directory. 
+if (strpos(realpath($fileDir), realpath($settings['baseDir'])) !== 0) {debugExit("File is out of base directory.");}
 
 if ($settings['concatenate']) {
 	if(!is_array($fileNames)){
@@ -180,24 +194,26 @@ foreach ($files as $key => $file) {
 if ($settings['concatenate']) {
         if (count(array_unique($fileTypes)) > 1) {debugExit("Files must be of the same type.");}
 }
-
+//check we have a minifier
 $fileType = $fileTypes[0];
 $fileMinifier = $settings[$fileType.'Minifier'];
 if(!file_exists('minifiers/'.$fileMinifier.'.php')) {debugExit($fileType.'Minifier not found. Please create "minifiers/'.$fileMinifier.'.php" or change minifier in config.php');}
-
+//check the file meets our filetypes list or 
 if (!isset($mimeTypes[$fileType])){ debugExit("Unsupported file type ($fileType)");}
 header("Content-Type: {$mimeTypes[$fileType]}; charset=".$settings['charSet']);
-
+// lets check and see if the client accepts compression and change our variable if it doesnt also check the filetype to ensure we want to compress.
 $settings['gzip'] =
 	($settings['gzip'] &&
 	!in_array($fileType, $settings['gzipExceptions']) &&
-	in_array('gzip', array_map('trim', explode(',' , $_SERVER['HTTP_ACCEPT_ENCODING']))) &&
+	in_array('gzip', array_map('trim', explode(',' ,  htmlspecialchars($_SERVER['HTTP_ACCEPT_ENCODING'], ENT_QUOTES)))) &&
 	function_exists('gzencode'));
-
+// ok client likes compression - lets tell it we are sending a compressed file.
 if ($settings['gzip']){ header("Content-Encoding: gzip");}
-
+//check we have a minifier
 $settings['minify'] = $settings['minify'] && file_exists('minifiers/'.$fileMinifier.'.php');
-$settings['embed'] = $settings['embed'] && $fileType == 'css' && (!preg_match('/msie/i', $_SERVER['HTTP_USER_AGENT']) || preg_match('/msie 8|opera/i', $_SERVER['HTTP_USER_AGENT']));
+//if its css and we have an opera browser embed the css 
+$settings['embed'] = $settings['embed'] && $fileType == 'css' && (!preg_match('/msie/i',  htmlspecialchars($_SERVER['HTTP_USER_AGENT'])) || preg_match('/msie 8|opera/i',  htmlspecialchars($_SERVER['HTTP_USER_AGENT'])));
+//check if we want to call the cache.
 $settings['serverCache'] = $settings['serverCache'] && ($settings['minify'] || $settings['gzip'] || $settings['concatenate'] || $settings['embed']);
 
 if ($settings['serverCache']) {
