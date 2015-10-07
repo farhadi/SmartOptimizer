@@ -14,9 +14,12 @@ function convertUrl($url, $count)
 	if (preg_match('@^[^/]+:@', $url)) return $url;
 	
 	$fileType = substr(strrchr($url, '.'), 1);
-	if (isset($mimeTypes[$fileType])) $mimeType = $mimeTypes[$fileType];
-	elseif (function_exists('mime_content_type')) $mimeType = mime_content_type($url);
-	else $mimeType = null;
+        if (isset($mimeTypes[$fileType]))
+                $mimeType = $mimeTypes[$fileType];
+        elseif (function_exists('mime_content_type') && file_exists($fileDir.$url))
+                $mimeType = mime_content_type($fileDir.$url);
+        else
+                $mimeType = null;
 	
 	if (!$settings['embed'] ||
 		!file_exists($fileDir.$url) ||

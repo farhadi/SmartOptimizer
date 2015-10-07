@@ -1,7 +1,12 @@
+## Copy the lower part of this file into your current .htaccess file or rename this file to 
+#  .htaccess if you dont have have one yet.
+#######
+# Begin Smartoptimizer 
+#
 <IfModule mod_expires.c>
 	<FilesMatch "\.(gif|jpg|jpeg|png|swf|css|js|html?|xml|txt|ico)$">
 		ExpiresActive On
-		ExpiresDefault "access plus 10 years"
+		ExpiresDefault "access plus 1 years"
 	</FilesMatch>
 </IfModule>
 <IfModule mod_rewrite.c>
@@ -24,3 +29,6 @@
 <FilesMatch "\.(gif|jpg|jpeg|png|swf|css|js|html?|xml|txt|ico)$">
 	FileETag none
 </FilesMatch>
+#
+# End SmartOptimizer additions
+######

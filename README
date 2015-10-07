@@ -1,6 +1,7 @@
-SmartOptimizer v1.8
+SmartOptimizer v1.8.1 alpha
 ------------------------
-Author: Ali Farhadi (http://farhadi.ir/)
+Author: Ben Charlton (https://github.com/Narimm)
+@Depreciated Original Author: Ali Farhadi (http://farhadi.ir/)
 Released under the terms of the GNU Public License.
 See the GPL for details (http://www.gnu.org/licenses/gpl.html).
 
@@ -39,9 +40,11 @@ Installation Instructions
 ------------------------
 1. Upload smartoptimizer folder to your website.
 2. "smartoptimizer/cache" folder should be writable (in most cases 777 permission is needed).
-3. Upload .htaccess file on the folder that smartoptimizer folder is placed, if there is no another htaccess file currently.
-   Otherwise, Copy content of SmartOptimizer htaccess file and paste it inside your current htaccess at the beginning of the file.
-4. It's ready. Enjoy it.
+3. Upload htaccess-smartoptimizer.txt file on the folder that smartoptimizer folder is placed, if there is no another .htaccess file currently rename it to .htaccess
+   Otherwise, Copy content of htaccess-smartoptimizer.txt and paste it inside your current htaccess at the beginning of the file.
+4. Access your site as normal to check everything works
+5 ../Smartoptimizer/config.php has settings you can tweak and change.
+
 
 
 Bug reports
@@ -50,4 +53,6 @@ SmartOptimizer is in beta stage and needs a large scale testing specially for it
 So any feedback is greatly appreciated.
 
 Use the issue tracker at github for bug reports:
-http://github.com/farhadi/SmartOptimizer/issues
+https://github.com/Narimm/SmartOptimizer/issues
+Please ensure your reports include the site you are working on and any errors reported - 
+this program is not intended for live production sites as it is only in Beta and needs more testing.
